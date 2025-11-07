@@ -45,7 +45,7 @@ for genome in data_list:
         if i['name'] == 'strain':
             strain = i['value']
         elif i['name'] == 'collection_date':
-            date = i['value']
+            date = i['value'] if 'value' in i else 'NA'
         elif i['name'] == 'host':
             host = i['value']
         elif i['name'] == 'geo_loc_name':
@@ -149,3 +149,4 @@ for accession, infomation in info_summary.items():
             shutil.copy(file, new_path)
 
 out_summary_table.close()
+
