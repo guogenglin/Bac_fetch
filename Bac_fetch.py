@@ -3,7 +3,7 @@
 Created on Tue Sep  9 10:35:20 2025
 
 @author: Genglin Guo
-@e-mail: 2019207025.njau.edu.cn
+@e-mail: 2019207025@njau.edu.cn
 """
 
 import subprocess
@@ -149,4 +149,5 @@ for accession, infomation in info_summary.items():
             shutil.copy(file, new_path)
 
 out_summary_table.close()
+
 
