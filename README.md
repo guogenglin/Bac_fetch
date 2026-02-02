@@ -8,7 +8,7 @@ Also, the file name of these downloaded genome sequence will be replaced by thei
 Datasets
 
 # Usage
-Acturally, there are no need to write a usage because this is a very simple script, but I still need to clarify how to use it, I haven't give a input because the requirement of everyone is different and the parameters will be too much. Here, follow these steps, I will show you how to download the genome sequence data as the way you want.
+Acturally, there are no need to write a usage because this is a very simple script, but I still need to clarify how to use it, I haven't give a input example because the requirement of everyone is different and the parameters will be too much. Here, follow these steps, I will show you how to download the genome sequence data as the way you want.
 
 1. Assign the variable 'species' by the species name of the bacteria you want to download genome sequences.
 2. Change the frist part of the variable 'outfilepath' to the path where you want to save the genome data.
