@@ -39,6 +39,10 @@ with open(jsonl_file, 'r', encoding='utf-8') as file:
 # a info dict, you can personalize design a dict contain any infomation you can obtain from Biosample or Assembly
 info_summary = dict()
 for genome in data_list:
+    assembly_level = genome['assemblyInfo']['assemblyLevel']
+    if assembly_level == 'Complete Genome':
+        assembly_level = 'Complete'
+    gc = str(genome['assemblyStats']['gcPercent'])
     info = genome['assemblyInfo']['biosample']['attributes']
     name, strain, date, host, country, isolate, sample, ident = '', '', '', '', '', '', '', ''
     for i in info:
@@ -109,7 +113,9 @@ for genome in data_list:
     info_summary[genome['accession']] = {'Name' : name, 
                                'Date' : date, 
                                'Host' : host, 
-                               'Country/Region' : country}
+                               'Country/Region' : country, 
+                               'Assembly' : assembly_level, 
+                               'GC percent' : gc}
 # These code was used to screen how many hosts we have screened, and we can recognize if there are duplicate, and modify the code above
 '''
 hosts = []
@@ -124,7 +130,7 @@ if not pathlib.Path(genome_outdir).exists():
     pathlib.Path(genome_outdir).mkdir()
 # generate a summary table to store the information we need
 out_summary_table = open(str(genome_outdir + '/data_summary.tsv'), 'wt')
-out_summary_table.write('Name\tYear\tHost\tCountry/Region\tAccession\n')
+out_summary_table.write('Name\tYear\tHost\tCountry/Region\tAssembly\tGC %\tAccession\n')
 # check if there are duplicate name
 name_list = []
 for accession, infomation in info_summary.items():
@@ -136,18 +142,24 @@ for accession, infomation in info_summary.items():
     out_summary_table.write('\t')
     out_summary_table.write(infomation['Country/Region'])
     out_summary_table.write('\t')
+    out_summary_table.write(infomation['Assembly'])
+    out_summary_table.write('\t')
+    out_summary_table.write(infomation['GC percent'])
+    out_summary_table.write('\t')
     out_summary_table.write(accession)
     out_summary_table.write('\n')
     origin_path = outfilepath[:-4] + '/ncbi_dataset/data/' + accession
     if infomation['Name'] not in name_list:
         name_list.append(infomation['Name'])
+        new_path = genome_outdir + infomation['Name'] + '.fasta'
+        for file in pathlib.Path(origin_path).iterdir():
+            if str(file).endswith('.fna'):
+                shutil.copy(file, new_path)
+        new_gbk_path = genome_outdir + infomation['Name'] + '.gbk'
+        for file in pathlib.Path(origin_path).iterdir():
+            if str(file).endswith('.gbff'):
+                shutil.copy(file, new_gbk_path)
     else:
         print('Accession:{}, Name: {}, there are already a genome sequence called this name, please check if they are the same.'.format(accession, infomation['Name']))
-    new_path = genome_outdir + infomation['Name'] + '.fasta'
-    for file in pathlib.Path(origin_path).iterdir():
-        if str(file).endswith('.fna'):
-            shutil.copy(file, new_path)
 
 out_summary_table.close()
-
-
