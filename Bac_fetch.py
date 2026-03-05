@@ -73,7 +73,7 @@ for genome in data_list:
         print('no name for {}'.format(genome['accession']))
     # remove the space within the name, space will cause problems during analysis, so as '(' and ')'
     if ' ' in name or '(' in name or ')' in name or ':' in name or '/' in name or '\\' in name or '=' in name:
-        trans_table = str.maketrans(' ():/\\=', '______')  # 将 'a' 和 'c' 映射为 'b'
+        trans_table = str.maketrans(' ():/\\=', '_______')  # 将 'a' 和 'c' 映射为 'b'
         name = name.translate(trans_table)
     # the format of date is xxxx-xx-xx, for example, 2025-09-09, a regular expression was used to identify them
     pattern = r'^\d{4}-\d{2}-\d{2}$'
@@ -163,4 +163,5 @@ for accession, infomation in info_summary.items():
         print('Accession:{}, Name: {}, there are already a genome sequence called this name, please check if they are the same.'.format(accession, infomation['Name']))
 
 out_summary_table.close()
+
 
