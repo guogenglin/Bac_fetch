@@ -14,11 +14,11 @@ import re
 import shutil
 
 # the species name of the bacteria you want to download
-species = 'Klebsiella michiganensis'
+species = 'Salmonella enterica'
 # define the output file name
 outfilename = species[0] + '_' + species.split(' ')[1] + '.zip'
 # the path of the output file
-outfilepath = 'F:/' + outfilename
+outfilepath = 'E:/' + outfilename
 
 # the command you want, there are a lot of parameters you can modify
 command = ['datasets', 'download', 'genome', 'taxon', species, '--assembly-source', 'RefSeq', 
@@ -83,25 +83,55 @@ for genome in data_list:
         # year is the most common used date infomation, if you want more, you can modify the code in the next line
         date = date.strip().split('-')[0]
     # see? everyone have a different way to say NA
-    if host.lower() in ['not determined', 'missing', 'none', 'not applicable', 'n/a', '', 'not collected', 'na']:
+    if host.lower() in ['not determined', 'missing', 'none', 'not applicable', 'n/a', '', 'not provided', 
+                        'not collected', 'na', 'nist mixed microbial rm strain', 'grown in blood agar culture medium.', 
+                        'zymobiomics microbial community standard strain', 'environment', 'no data', 
+                        'unknown', 'not available']:
         host = 'NA'
     # The rest part I'm trying to consice the diversity species name, there are many way to present 'human', ' pig', but only one should be recorded for futher analysis
-    elif any(keyword in host.lower() for keyword in ['homo sapiens', 'male', 'female', 'patient', 'human']):
+    elif any(keyword in host.lower() for keyword in ['homo sapiens', 'male', 'female', 'patient', 
+                                                     'human']):
         host = 'Human'
-    elif any(keyword in host.lower() for keyword in ['bactrocera dorsalis', 'ceratitis capitata', 'drosophila', 'anastrepha fraterculus', 'stomoxys', 'musca domestica']):
+    elif any(keyword in host.lower() for keyword in ['bactrocera dorsalis', 'ceratitis capitata', 
+                                                     'drosophila', 'anastrepha fraterculus', 'stomoxys', 
+                                                     'musca domestica']):
         host = 'Fruit fly'
     elif any(keyword in host.lower() for keyword in ['zea mays', 'ustilago maydis']):
         host = 'Corn'
-    elif any(keyword in host.lower() for keyword in ['gallus gallus']):
+    elif any(keyword in host.lower() for keyword in ['gallus gallus', 'qingyuan chicken', 'chicken (sonali)', 
+                                                     'chicken (layer)', 'chicken (broiler)', 
+                                                     'plymouth rock chicken', 'chick', 'broiler chicken', 
+                                                     'chroicocephalus novaehollandiae (australian silver gull chick)', 
+                                                     'chicken breast']):
         host = 'Chicken'
     elif any(keyword in host.lower() for keyword in ['serpentes']):
         host = 'Snake'
-    elif any(keyword in host.lower() for keyword in ['cow', 'cattle', 'bos taurus']):
+    elif any(keyword in host.lower() for keyword in ['cow', 'cattle', 'bos taurus', 'bovine']):
         host = 'Cattle'
     elif any(keyword in host.lower() for keyword in ['capra hircus']):
         host = 'Goat'
-    elif any(keyword in host.lower() for keyword in ['sus scrofa', 'pig']):
+    elif any(keyword in host.lower() for keyword in ['ovis aries']):
+        host = 'Sheep'
+    elif any(keyword in host.lower() for keyword in ['sus scrofa', 'pig', 'swine', 'porcine', 
+                                                     'sus sp.', 'pork']):
         host = 'Pig'
+    elif any(keyword in host.lower() for keyword in ['equus ferus caballus', 'horse', 'equus caballus', 
+                                                     'equus asinus', 'equine']):
+        host = 'Horse'
+    elif any(keyword in host.lower() for keyword in ['canis lupus familiaris', 'pet dog', 'canis latrans', 
+                                                     'canine']):
+        host = 'Dog'
+    elif any(keyword in host.lower() for keyword in ['feline', 'felis catus']):
+        host = 'Cat'
+    elif any(keyword in host.lower() for keyword in ['yak']):
+        host = 'Yak'
+    elif any(keyword in host.lower() for keyword in ['mink']):
+        host = 'Mustelids'
+    elif any(keyword in host.lower() for keyword in ['elaphe taeniura', 'lampropeltis triangulum']):
+        host = 'Snake'
+    elif any(keyword in host.lower() for keyword in ['mandarin fish', 'weever', 'grass carp', 'carp', 
+                                                     'fish', 'anabas testudineus', 'pangasianodon hypophthalmus']):
+        host = 'Fish'
     else:
         host = host.capitalize()
     # like the date, country/region is also contain more infomation, for example, China: Nanjing, normally we only need country/region
@@ -131,8 +161,7 @@ if not pathlib.Path(genome_outdir).exists():
 # generate a summary table to store the information we need
 out_summary_table = open(str(genome_outdir + '/data_summary.tsv'), 'wt')
 out_summary_table.write('Name\tYear\tHost\tCountry/Region\tAssembly\tGC %\tAccession\n')
-# check if there are duplicate name
-name_list = []
+
 for accession, infomation in info_summary.items():
     out_summary_table.write(infomation['Name'])
     out_summary_table.write('\t')
@@ -149,18 +178,14 @@ for accession, infomation in info_summary.items():
     out_summary_table.write(accession)
     out_summary_table.write('\n')
     origin_path = outfilepath[:-4] + '/ncbi_dataset/data/' + accession
-    if infomation['Name'] not in name_list:
-        name_list.append(infomation['Name'])
-        new_path = genome_outdir + infomation['Name'] + '.fasta'
-        for file in pathlib.Path(origin_path).iterdir():
-            if str(file).endswith('.fna'):
-                shutil.copy(file, new_path)
-        new_gbk_path = genome_outdir + infomation['Name'] + '.gbk'
-        for file in pathlib.Path(origin_path).iterdir():
-            if str(file).endswith('.gbff'):
-                shutil.copy(file, new_gbk_path)
-    else:
-        print('Accession:{}, Name: {}, there are already a genome sequence called this name, please check if they are the same.'.format(accession, infomation['Name']))
+    new_path = genome_outdir + accession + '.fasta'
+    for file in pathlib.Path(origin_path).iterdir():
+        if str(file).endswith('.fna'):
+            shutil.copy(file, new_path)
+    new_gbk_path = genome_outdir + accession + '.gbk'
+    for file in pathlib.Path(origin_path).iterdir():
+        if str(file).endswith('.gbff'):
+            shutil.copy(file, new_gbk_path)
 
 out_summary_table.close()
 
