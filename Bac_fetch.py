@@ -18,7 +18,7 @@ species = 'Salmonella enterica'
 # define the output file name
 outfilename = species[0] + '_' + species.split(' ')[1] + '.zip'
 # the path of the output file
-outfilepath = 'E:/' + outfilename
+outfilepath = 'F:/' + outfilename
 
 # the command you want, there are a lot of parameters you can modify
 command = ['datasets', 'download', 'genome', 'taxon', species, '--assembly-source', 'RefSeq', 
